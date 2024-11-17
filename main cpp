@@ -287,7 +287,10 @@ int main(void)
     #define FPS 30
     #define MAX_DURATION 60
 
-    float **events =(float **)malloc(FPS * MAX_DURATION * 50* sizeof(float *));
+    // float **events =(float **)malloc(FPS * MAX_DURATION * 50* sizeof(float *));
+
+    // Use std::vector for safe and automatic memory management
+    std::vector<std::vector<float>> events(FPS * MAX_DURATION); // Create a vector of vectors
 
 
 
@@ -399,10 +402,12 @@ int main(void)
                 float *events_array = insert_t(corner_points, num_of_groups, GetTime());
 
                 int events_per_frame = num_of_groups * 4;
-                events[frame_number] = static_cast<float *>(malloc(events_per_frame * sizeof(float)));
-                if (events[frame_number] == NULL){ std::cout << "Out of Memory" << std::endl;  return 1;}
+                events[frame_number].resize(events_per_frame); // Resize the vector for this frame
+                std::copy(events_array, events_array + events_per_frame, events[frame_number].begin()); // Copy the data
+                //events[frame_number] = static_cast<float *>(malloc(events_per_frame * sizeof(float)));
+                //if (events[frame_number] == NULL){ std::cout << "Out of Memory" << std::endl;  return 1;}
 
-                memcpy(events[frame_number], events_array, sizeof(float) * events_per_frame);
+                //memcpy(events[frame_number], events_array, sizeof(float) * events_per_frame);
 
 
                 /*
@@ -457,12 +462,16 @@ int main(void)
         //----------------------------------------------------------------------------------
     }
 
-    // Access the stored frames (for demonstration)
-    for (int i = 0; i < 10; i++) {
 
-        std::cout << i << std::endl;
-        for (int j = 0; j < 96; j++) {
-            std::cout << events[0][0] << std::endl;
+    // Access the stored frames (now safe)
+    for (int i = 0; i < 10; i++) {
+        //std::cout << i << std::endl;
+        for (int j = 0; j < 96; j++) { // Check your dimensions; 96 might be wrong
+            if(i < events.size() && j < events[i].size()){  //Check bounds before accessing
+                std::cout << events[i][j] << std::endl;
+            } else {
+                std::cout << "Out of bounds" << std::endl;
+            }
         }
     }
 
