@@ -13,6 +13,6 @@ float* getLorentzMatrix(const float* velocity);
 float** getRotMatrices(const float* velocity);
 float* getFinalMatrix(float* velocity);
 
-float* transformation(const float* inputArrays, const float* velocity);
+float* transformation(const float* inputArray, float* velocity, int size_of_input_array);
 
 #endif

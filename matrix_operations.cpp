@@ -278,22 +278,60 @@ float* getFinalMatrix(float* velocity) {
     return final; // Return the final matrix A_f
 }
 
+// Function to reshape a 1D array into a 2D vector
+std::vector<std::vector<float> > reshapeTo2D(const float* inputArray, int rows, int cols) {
+    std::vector<std::vector<float> > result(rows, std::vector<float>(cols));
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            result[i][j] = inputArray[i * cols + j];
+        }
+    }
+    return result;
+}
 
 // Transformation function
-float* transformation(const float* inputArrays, const float* velocity) {
-    // Get Lorentz matrix and rotation matrices
-    float* lorentzMatrix = getLorentzMatrix(velocity);
+float* transformation(const float* inputArray, float* velocity, int size_of_input_array) {
+    int cols = 4; // Fixed column size
+    int rows = size_of_input_array / cols;
+    //int size = sizeof(inputArray) / sizeof(inputArray[0]);
 
-    for (int i=0; i<16; i++) {
-      std::cout << lorentzMatrix[i] << std::endl;
+    // Reshape into 2D array
+    std::vector<std::vector<float> > reshapedArray = reshapeTo2D(inputArray, rows, cols);
+
+    // Get the final transformation matrix
+    float* finalMatrix = getFinalMatrix(velocity);
+    if (finalMatrix == nullptr) {
+        std::cerr << "Error: Failed to get the final transformation matrix." << std::endl;
     }
 
-    float** rotationMatrices = getRotMatrices(velocity);
+    // 1D vector to store the results
+    std::vector<float> finalResults;
 
-    // Example: apply transformation by multiplying the Lorentz matrix with rotation matrix
-    float* result = matrixMultiply(reinterpret_cast<float(*)[4]>(lorentzMatrix), reinterpret_cast<float(*)[4]>(rotationMatrices[0]));
+    // Loop through each row of the reshaped array
+    for (int i = 0; i < rows; ++i) {
+        // Convert the current row to a column vector
+        float rowVector[4] = {reshapedArray[i][0], reshapedArray[i][1], reshapedArray[i][2], reshapedArray[i][3]};
+        float* rowResult = matrixVectorMultiply(reinterpret_cast<float(*)[4]>(finalMatrix), reinterpret_cast<float(*)[1]>(&rowVector));
 
-    // Return the resulting transformation matrix
-    return result;
+        // Check for multiplication success
+        if (rowResult == nullptr) {
+            std::cerr << "Error: Failed to multiply matrix with row vector " << i << "." << std::endl;
+            free(finalMatrix);
+        }
+
+        // Append results to the final 1D array
+        for (int j = 0; j < 4; ++j) {
+            finalResults.push_back(rowResult[j]);
+        }
+
+        // Free the memory allocated for the row result
+        free(rowResult);
+    }
+
+    float* resultant_events = new float[finalResults.size()];
+    std::copy(finalResults.begin(), finalResults.end(), resultant_events);
+    return resultant_events;
+
+
 }
 

@@ -9,10 +9,9 @@ int main() {
     float inputArray[] = {1, 5, 2, 1, 1, 5, 2, 1}; // Example input
     float velocity[] = {0.2, 0.1, 0.5};  // Example velocity vector
 
-
-
     // Call the transformation function
-    float* result = transformation(inputArray, velocity);
+    int size_of_input_array = sizeof(inputArray) / sizeof(inputArray[0]);
+    float* result = transformation(inputArray, velocity, size_of_input_array);
 
     // Check if the result is not null
     if (result != nullptr) {
