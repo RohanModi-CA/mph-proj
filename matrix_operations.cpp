@@ -290,7 +290,7 @@ std::vector<std::vector<float> > reshapeTo2D(const float* inputArray, int rows, 
 }
 
 // Transformation function
-float* transformation(const float* inputArray, float* velocity, int size_of_input_array) {
+std::vector<float> transformation(const float* inputArray, float* velocity, int size_of_input_array) {
     int cols = 4; // Fixed column size
     int rows = size_of_input_array / cols;
     //int size = sizeof(inputArray) / sizeof(inputArray[0]);
@@ -327,11 +327,13 @@ float* transformation(const float* inputArray, float* velocity, int size_of_inpu
         // Free the memory allocated for the row result
         free(rowResult);
     }
-
-    float* resultant_events = new float[finalResults.size()];
+    for (float val : finalResults) {
+        //std::cout << val << " ";
+    }
+    std::cout << std::endl;
+    /*float* resultant_events = new float[finalResults.size()];
     std::copy(finalResults.begin(), finalResults.end(), resultant_events);
-    return resultant_events;
-
+    return resultant_events; */
+    return finalResults;
 
 }
-
