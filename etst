@@ -1,0 +1,72 @@
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+// Function to process events and return the reorganized data
+vector<vector<vector<float>>> processEvents(const vector<vector<float>>& events, int groups=8, int values_per_group=4) {
+    int events_size = events.size();
+    if (events.size() != events_size) {
+        cerr << "Error: Inconsistent events_size and events size." << endl;
+        //Return an empty vector to indicate an error.  Could throw an exception for better error handling
+        return {};
+    }
+
+    vector<vector<vector<float>>> new_vectors(groups);
+
+    for (int i = 0; i < groups; ++i) {
+        new_vectors[i].resize(events_size);
+        for (int j = 0; j < events_size; ++j) {
+            if (events[j].size() < (i + 1) * values_per_group) {
+                cerr << "Error: Insufficient elements in events[" << j << "]." << endl;
+                return {}; //Return an empty vector to indicate an error
+            }
+            new_vectors[i][j].resize(values_per_group);
+            for (int k = 0; k < values_per_group; ++k) {
+                new_vectors[i][j][k] = events[j][i * values_per_group + k];
+            }
+        }
+    }
+
+    for (int i = 0; i < groups; ++i) {
+        sort(new_vectors[i].begin(), new_vectors[i].end(), [](const vector<float>& a, const vector<float>& b) {
+            return a[0] < b[0];
+        });
+    }
+
+    return new_vectors;
+}
+
+
+int main() {
+    std::vector<std::vector<float>> events = {
+        {0.241648, -1.5, -1, 2.5, 0.241648, 1.5, -1, 2.5, 0.241648, 1.5, 1, 2.5, 0.241648, -1.5, 1, 2.5, 0.241648, -1.5, -1, -2.5, 0.241648, -1.5, 1, -2.5, 0.241648, 1.5, 1, -2.5, 0.241648, 1.5, -1, -2.5},
+        {0.274753, -1.5, -1, 2.5, 0.274753, 1.5, -1, 2.5, 0.274753, 1.5, 1, 2.5, 0.274753, -1.5, 1, 2.5, 0.274753, -1.5, -1, -2.5, 0.274753, -1.5, 1, -2.5, 0.274753, 1.5, 1, -2.5, 0.274753, 1.5, -1, -2.5},
+        {2.308201, -1.5, -1, 2.5, 0.308201, 1.5, -1, 2.5, 0.308201, 1.5, 1, 2.5, 0.308201, -1.5, 1, 2.5, 0.308201, -1.5, -1, -2.5, 0.308201, -1.5, 1, -2.5, 0.308201, 1.5, 1, -2.5, 0.308201, 1.5, -1, -2.5}
+    };
+
+    int FPS = 1000;
+    int MAX_DURATION = 100;
+    int groups = 8;
+    int values_per_group = 4;
+
+    auto result = processEvents(events);
+
+    //Check for errors before printing
+    if(result.empty()){
+        return 1; // Indicate an error
+    }
+
+    for (int i = 0; i < groups; ++i) {
+        cout << "new_vector" << i + 1 << ":" << endl;
+        for (const auto& inner_vec : result[i]) {
+            for (float val : inner_vec) {
+                cout << val << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
